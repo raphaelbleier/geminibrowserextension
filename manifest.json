@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Screenshot Q&A",
+  "version": "0.1.0",
+  "description": "Drag-select a screenshot and ask Gemini 3 with a prompt. Shows answers in an in-page overlay.",
+  "permissions": ["storage", "activeTab", "tabs", "scripting"],
+  "host_permissions": ["https://generativelanguage.googleapis.com/*"],
+  "action": {
+    "default_title": "Gemini Overlay",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
+}

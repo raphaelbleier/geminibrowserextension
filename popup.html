@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini Overlay</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #151820;
+        color: #f2f2f2;
+        width: 240px;
+      }
+      button {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: none;
+        background: #2f6fed;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+      button.secondary {
+        background: #2c2c34;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="openOverlay">Open Overlay</button>
+    <button id="openSettings" class="secondary">Settings</button>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
