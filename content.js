@@ -365,7 +365,17 @@ function startSelection() {
       return;
     }
 
+    let previousVisibility = null;
+    if (overlayRoot) {
+      previousVisibility = overlayRoot.style.visibility;
+      overlayRoot.style.visibility = "hidden";
+    }
+
     const response = await chrome.runtime.sendMessage({ type: "CAPTURE_VISIBLE_TAB" });
+
+    if (overlayRoot) {
+      overlayRoot.style.visibility = previousVisibility || "visible";
+    }
     if (!response?.ok) {
       showWarning(response?.error || "Capture failed.");
       return;

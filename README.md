@@ -56,4 +56,7 @@ The default system prompt is pre-filled and required. It enforces:
 - The overlay position/size is stored globally and restored on each page.
 
 ## License
-Add your preferred license.
+MIT License. See LICENSE.
+
+## Author
+Raphael Bleier

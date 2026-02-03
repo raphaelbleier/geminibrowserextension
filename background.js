@@ -73,11 +73,17 @@ async function handleGeminiRequest(message) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
       model
     )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -100,6 +106,9 @@ async function handleGeminiRequest(message) {
 
     return { ok: true, answer, entry };
   } catch (error) {
+    if (error?.name === "AbortError") {
+      return { ok: false, error: "Request timed out after 90 seconds." };
+    }
     return { ok: false, error: error?.message || "Request failed." };
   }
 }
