@@ -51,6 +51,24 @@ The default system prompt is pre-filled and required. It enforces:
 - `options.html` / `options.js` — settings UI
 - `popup.html` / `popup.js` — quick access
 
+## Electron Desktop App (Windows)
+The Electron version lives in the `electron-app` folder and mirrors the extension behavior with a global, stealth overlay window.
+
+### Local build (requires Windows build tools)
+1. Install **Visual Studio Build Tools** with **Desktop development with C++** and a **Windows 10/11 SDK** (needed for `ffi-napi`).
+2. In `electron-app`:
+   - `npm install`
+   - `npm run start`
+
+### Release builds via GitHub Actions
+This repo includes a workflow that builds a Windows installer and publishes a GitHub Release when you push a tag.
+
+**How to release:**
+1. Create and push a tag like `v1.0.0`.
+2. GitHub Actions will build and attach the installer to the release automatically.
+
+Workflow file: `electron-app/.github/workflows/release.yml`
+
 ## Notes
 - If any required setting is missing, requests are blocked.
 - The overlay position/size is stored globally and restored on each page.
