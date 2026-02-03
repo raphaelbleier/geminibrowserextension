@@ -103,6 +103,35 @@
   font-size: 13px;
 }
 
+.gemini-overlay-answer p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.gemini-overlay-answer ul {
+  margin: 6px 0 6px 18px;
+  padding: 0;
+}
+
+.gemini-overlay-answer code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
+
+.gemini-overlay-answer strong {
+  font-weight: 700;
+}
+
+.gemini-overlay-answer .gemini-math {
+  font-family: "Cambria Math", "Times New Roman", serif;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
 .gemini-overlay-history {
   max-height: 140px;
   overflow: auto;

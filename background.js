@@ -36,6 +36,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== "open-overlay") return;
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) return;
+  chrome.tabs.sendMessage(tab.id, { type: "OPEN_OVERLAY" });
+});
+
 async function handleGeminiRequest(message) {
   const settings = await getSettings();
   const missing = getMissingSettings(settings);

@@ -31,7 +31,8 @@ A Chrome MV3 extension that lets you drag-select a screenshot, add a text prompt
    - System prompt (pre-filled; required)
 
 ## Usage
-- Click the extension icon → **Open Overlay**.
+- Press **Alt+Shift+O** to open the overlay, or click the extension icon → **Open Overlay**.
+- If the shortcut doesn’t work, set it manually at `chrome://extensions/shortcuts`.
 - Click **Select Area** and drag to select a screenshot area.
 - Add your prompt, then click **Ask Gemini**.
 - Use **Copy Answer** to copy the response.

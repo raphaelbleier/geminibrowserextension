@@ -55,6 +55,13 @@ function createOverlay() {
   captureBtn.textContent = "Select Area";
   captureBtn.addEventListener("click", () => startSelection());
 
+  const hideBtn = document.createElement("button");
+  hideBtn.textContent = "Hide Overlay";
+  hideBtn.className = "secondary";
+  hideBtn.addEventListener("click", () => {
+    overlayRoot.style.display = "none";
+  });
+
   const askBtn = document.createElement("button");
   askBtn.textContent = "Ask Gemini";
   askBtn.addEventListener("click", () => submitRequest());
@@ -71,7 +78,7 @@ function createOverlay() {
     chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" });
   });
 
-  actions.append(captureBtn, askBtn, copyBtn, settingsBtn);
+  actions.append(captureBtn, hideBtn, askBtn, copyBtn, settingsBtn);
 
   const answer = document.createElement("div");
   answer.className = "gemini-overlay-answer";
@@ -173,7 +180,7 @@ function showWarning(text) {
 
 function setAnswer(text) {
   const { answer } = overlayRoot._elements;
-  answer.textContent = text || "";
+  answer.innerHTML = renderMarkdown(text || "");
 }
 
 async function submitRequest() {
@@ -209,6 +216,62 @@ async function copyAnswer() {
   } catch {
     showWarning("Copy failed.");
   }
+}
+
+function renderMarkdown(input) {
+  const escaped = escapeHtml(input);
+  const lines = escaped.split(/\r?\n/);
+  let html = "";
+  let inList = false;
+
+  const flushList = () => {
+    if (inList) {
+      html += "</ul>";
+      inList = false;
+    }
+  };
+
+  lines.forEach((line) => {
+    if (/^\s*[-*]\s+/.test(line)) {
+      if (!inList) {
+        html += "<ul>";
+        inList = true;
+      }
+      const item = line.replace(/^\s*[-*]\s+/, "");
+      html += `<li>${applyInlineMarkdown(item)}</li>`;
+      return;
+    }
+
+    flushList();
+
+    if (!line.trim()) {
+      html += "<br />";
+      return;
+    }
+
+    html += `<p>${applyInlineMarkdown(line)}</p>`;
+  });
+
+  flushList();
+  return html;
+}
+
+function applyInlineMarkdown(text) {
+  let output = text;
+  output = output.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  output = output.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  output = output.replace(/`(.+?)`/g, "<code>$1</code>");
+  output = output.replace(/\$([^$]+)\$/g, "<span class=\"gemini-math\">$1</span>");
+  return output;
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 async function loadHistory() {
@@ -248,22 +311,31 @@ function startSelection() {
 
   let startX = 0;
   let startY = 0;
+  let isSelecting = false;
 
   function cleanup() {
     overlay.remove();
     rectEl.remove();
+    overlay.removeEventListener("pointerdown", onPointerDown);
+    overlay.removeEventListener("pointermove", onPointerMove);
+    overlay.removeEventListener("pointerup", onPointerUp);
+    overlay.removeEventListener("pointercancel", onPointerCancel);
   }
 
-  function onMouseDown(event) {
+  function onPointerDown(event) {
+    overlay.setPointerCapture(event.pointerId);
+    isSelecting = true;
     startX = event.clientX;
     startY = event.clientY;
     rectEl.style.left = `${startX}px`;
     rectEl.style.top = `${startY}px`;
     rectEl.style.width = "0px";
     rectEl.style.height = "0px";
+    event.preventDefault();
   }
 
-  function onMouseMove(event) {
+  function onPointerMove(event) {
+    if (!isSelecting) return;
     const currentX = event.clientX;
     const currentY = event.clientY;
     const left = Math.min(startX, currentX);
@@ -274,9 +346,12 @@ function startSelection() {
     rectEl.style.top = `${top}px`;
     rectEl.style.width = `${width}px`;
     rectEl.style.height = `${height}px`;
+    event.preventDefault();
   }
 
-  async function onMouseUp(event) {
+  async function onPointerUp(event) {
+    if (!isSelecting) return;
+    isSelecting = false;
     const endX = event.clientX;
     const endY = event.clientY;
     const left = Math.min(startX, endX);
@@ -284,9 +359,6 @@ function startSelection() {
     const width = Math.abs(endX - startX);
     const height = Math.abs(endY - startY);
     cleanup();
-    overlay.removeEventListener("mousedown", onMouseDown);
-    overlay.removeEventListener("mousemove", onMouseMove);
-    overlay.removeEventListener("mouseup", onMouseUp);
 
     if (width < 8 || height < 8) {
       showWarning("Selection too small.");
@@ -311,9 +383,16 @@ function startSelection() {
     showWarning("Screenshot captured.");
   }
 
-  overlay.addEventListener("mousedown", onMouseDown, { once: true });
-  overlay.addEventListener("mousemove", onMouseMove);
-  overlay.addEventListener("mouseup", onMouseUp);
+  function onPointerCancel() {
+    if (!isSelecting) return;
+    isSelecting = false;
+    cleanup();
+  }
+
+  overlay.addEventListener("pointerdown", onPointerDown);
+  overlay.addEventListener("pointermove", onPointerMove);
+  overlay.addEventListener("pointerup", onPointerUp);
+  overlay.addEventListener("pointercancel", onPointerCancel);
 }
 
 async function cropImage(dataUrl, rect) {

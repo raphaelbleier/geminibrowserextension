@@ -14,6 +14,14 @@
     "service_worker": "background.js",
     "type": "module"
   },
+  "commands": {
+    "open-overlay": {
+      "suggested_key": {
+        "default": "Alt+Shift+O"
+      },
+      "description": "Open Gemini overlay"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
